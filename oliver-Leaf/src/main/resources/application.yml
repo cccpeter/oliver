@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: Leaf-ID
+server:
+  port: 7901
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://user:password@localhost:8761/eureka/
+    instance-info-replication-interval-seconds: 10
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
