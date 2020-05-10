@@ -11,6 +11,8 @@
     <modules>
         <module>oliver-Eureka</module>
         <module>oliver-Leaf</module>
+        <module>oliver-spider</module>
+        <module>oliver-test</module>
     </modules>
     <properties>
         <spring.boot.version>2.0.6.RELEASE </spring.boot.version>

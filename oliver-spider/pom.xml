@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>oliver-Leaf</artifactId>
+    <artifactId>oliver-spider</artifactId>
     <packaging>jar</packaging>
     <version>1.0.1</version>
     <properties>

@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @Desc: 测试接入feign
  * @Date: cretead in 2019/10/18 10:10
  * @Last Modified: by
- * @return value
+ * @return valueLeaf-ID
  */
-@FeignClient(name = "leaf-Id-Get",path="/getLeafId")
+@FeignClient(name = "Leaf-ID")
 public interface TestIdFeign {
         @RequestMapping(value = "/getLeafId", method = RequestMethod.GET)
-        OperationResult getId();
+        String getId();
 }

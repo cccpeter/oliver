@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>bluebird-Eureka</artifactId>
+    <artifactId>oliver-Eureka</artifactId>
     <packaging>jar</packaging>
 
     <parent>
-        <artifactId>com.bluebird</artifactId>
-        <groupId>bluebird</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <artifactId>oliver</artifactId>
+        <groupId>com.oliver</groupId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
