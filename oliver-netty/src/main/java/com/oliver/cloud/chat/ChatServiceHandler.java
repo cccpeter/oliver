@@ -2,13 +2,17 @@ package com.oliver.cloud.chat;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
+import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.*;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 
-public class ChatServiceHandler extends SimpleChannelInboundHandler<String> {
+public class ChatServiceHandler extends SimpleChannelInboundHandler<HttpObject> {
     /**
      * @Author: Oliver
      * @Desc: 获取所有已连接的socket对象
@@ -37,9 +41,9 @@ public class ChatServiceHandler extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    protected void channelRead0(final ChannelHandlerContext ctx, String msg) throws Exception { // (4)
-//        Channel incoming = ctx.channel();
-//        System.out.println("收到客户端的数据为："+"客户端ip"+incoming.remoteAddress()+s);
+    protected void channelRead0(final ChannelHandlerContext ctx, HttpObject msg) throws Exception { // (4)
+        Channel incoming = ctx.channel();
+        System.out.println("收到客户端的数据为："+"客户端ip"+incoming.remoteAddress());
 //        for (Channel channel : channels) {
 //            if (channel != incoming){
 //                channel.writeAndFlush("[" + incoming.remoteAddress() + "]" + s + "\n");
@@ -48,60 +52,65 @@ public class ChatServiceHandler extends SimpleChannelInboundHandler<String> {
 //            }
 //        }
 //        转化为HttpRequest
-        System.out.println("test成功");
-//        HttpRequest req = null;
-//        if (msg instanceof HttpRequest) {
-//            req = (HttpRequest) msg;
-//        }
-////        开始向服务端转发数据，获取服务端连接
-//        HttpMethod method = req.method();
-//        Promise<Channel> promise = createPromise("localhost", 7810);
+        HttpRequest req = null;
+        if (msg instanceof HttpRequest) {
+            req = (HttpRequest) msg;
+        }
+        System.out.println(req);
+//        开始向服务端转发数据，获取服务端连接
+        if(req != null) {
+            HttpMethod method = req.method();
+//            创建http请求
+            System.out.println("create request");
+            Promise<Channel> promise = createPromise("localhost", 7810);
         /*
         根据是http还是http的不同，为promise添加不同的监听器
         */
-        System.out.println("开始请求");
-//        if (method.equals(HttpMethod.CONNECT)) {
-//            //如果是https的连接
-//
-//            promise.addListener(new FutureListener<Channel>() {
-////                @Override
-//                public void operationComplete(Future<Channel> channelFuture) throws Exception {
-//                    //首先向浏览器发送一个200的响应，证明已经连接成功了，可以发送数据了
-//                    FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "OK"));
-//                    //向浏览器发送同意连接的响应，并在发送完成后移除httpcode和httpservice两个handler
-//                    ctx.writeAndFlush(resp).addListener(new ChannelFutureListener() {
-////                        @Override
-//                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
-//                            ChannelPipeline p = ctx.pipeline();
-//                            p.remove("httpcode");
-//                            p.remove("httpservice");
-//                        }
-//                    });
-//                    ChannelPipeline p = ctx.pipeline();
-//                    //将客户端channel添加到转换数据的channel，（这个NoneHandler是自己写的）
-//                    p.addLast(new NoneHandler(channelFuture.getNow()));
-//                }
-//            });
-//        } else {
-//            //如果是http连接，首先将接受的请求转换成原始字节数据
-//            EmbeddedChannel em = new EmbeddedChannel(new HttpRequestEncoder());
-//            em.writeOutbound(req);
-//            System.out.println("http转化原始字节流"+em.toString());
-//            final Object o = em.readOutbound();
-//            em.close();
-//            promise.addListener(new FutureListener<Channel>() {
-////                @Override
-//                public void operationComplete(Future<Channel> channelFuture) throws Exception {
-//                    //移除	httpcode	httpservice 并添加	NoneHandler，并向服务器发送请求的byte数据
-//                    ChannelPipeline p = ctx.pipeline();
-//                    p.remove("httpcode");
-//                    p.remove("httpservice");
-//                    //添加handler
-//                    p.addLast(new NoneHandler(channelFuture.getNow()));
-//                    channelFuture.get().writeAndFlush(o);
-//                }
-//            });
-//        }
+            if (method.equals(HttpMethod.CONNECT)) {
+                System.out.println("进入https");
+                //如果是https的连接
+                promise.addListener(new FutureListener<Channel>() {
+                    //                @Override
+                    public void operationComplete(Future<Channel> channelFuture) throws Exception {
+                        //首先向浏览器发送一个200的响应，证明已经连接成功了，可以发送数据了
+                        FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "OK"));
+                        //向浏览器发送同意连接的响应，并在发送完成后移除httpcode和httpservice两个handler
+                        ctx.writeAndFlush(resp).addListener(new ChannelFutureListener() {
+//                            @Override
+                            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                                ChannelPipeline p = ctx.pipeline();
+                                p.remove("httpcode");
+                                p.remove("httpservice");
+                            }
+                        });
+                        ChannelPipeline p = ctx.pipeline();
+                        //将客户端channel添加到转换数据的channel，（这个NoneHandler是自己写的）
+                        //添加handler
+                        p.addLast(new NoneHandler(channelFuture.getNow()));
+                    }
+                });
+            } else {
+                //如果是http连接，首先将接受的请求转换成原始字节数据
+                System.out.println("转化原生字节流");
+                EmbeddedChannel em = new EmbeddedChannel(new HttpRequestEncoder());
+                em.writeOutbound(req);
+                System.out.println("http转化原始字节流" + em.toString());
+                final Object o = em.readOutbound();
+                em.close();
+                promise.addListener(new FutureListener<Channel>() {
+//                   @Override
+                    public void operationComplete(Future<Channel> channelFuture) throws Exception {
+                        //移除	httpcode	httpservice 并添加	NoneHandler，并向服务器发送请求的byte数据
+                        ChannelPipeline p = ctx.pipeline();
+                        p.remove("httpcode");
+                        p.remove("httpservice");
+                        //添加handler
+                        p.addLast(new NoneHandler(channelFuture.getNow()));
+                        channelFuture.get().writeAndFlush(o);
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -125,6 +134,10 @@ public class ChatServiceHandler extends SimpleChannelInboundHandler<String> {
         // 当出现异常就关闭连接
         cause.printStackTrace();
         ctx.close();
+    }
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
     }
     /**
      * @Author: Oliver

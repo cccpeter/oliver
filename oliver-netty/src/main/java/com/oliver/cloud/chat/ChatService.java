@@ -43,7 +43,14 @@ public class ChatService {
             System.out.println("SimpleChatServer 关闭了");
         }
     }
-
+    /**
+     * @Author: Oliver
+     * @Desc: 客户端转发http/https请求（https需要进行ssl握手）
+     * @Remark: Demand
+     * @Date: cretead in 2020/6/4 10:59
+     * @Last Modified: by
+     * @return value
+     */
     public static void main(String[] args) throws Exception {
         int port;
         if (args.length > 0) {

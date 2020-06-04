@@ -1,4 +1,4 @@
-package com.oliver.cloud.webchat;
+package com.oliver.cloud.chat;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -7,11 +7,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class WebsocketChatServer {
-
+public class RemoteService {
     private int port;
 
-    public WebsocketChatServer(int port) {
+    public RemoteService(int port) {
         this.port = port;
     }
 
@@ -23,11 +22,11 @@ public class WebsocketChatServer {
             ServerBootstrap b = new ServerBootstrap(); // (2)
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class) // (3)
-                    .childHandler(new WebsocketChatServerInitializer())  //(4)
+                    .childHandler(new RemoteServiceInitializer())  //(4)
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)
                     .childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
 
-            System.out.println("WebsocketChatServer 启动了");
+            System.out.println("RemoteService 启动了");
 
             // 绑定端口，开始接收进来的连接
             ChannelFuture f = b.bind(port).sync(); // (7)
@@ -40,7 +39,7 @@ public class WebsocketChatServer {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
 
-            System.out.println("WebsocketChatServer 关闭了");
+            System.out.println("RemoteServer 关闭了");
         }
     }
 
@@ -51,7 +50,7 @@ public class WebsocketChatServer {
         } else {
             port = 7810;
         }
-        new WebsocketChatServer(port).run();
+        new RemoteService(port).run();
 
     }
 }
